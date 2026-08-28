@@ -1,0 +1,32 @@
+(defpackage :math/tests
+  (:use :cl :math :review)
+  (:export )
+  )
+
+(in-package :math/tests)
+
+(clear-suites)
+(defsuite math-tests)
+(in-suite math-tests)
+
+(test sanity-test
+      (check t)
+  )
+ 
+(test isotita
+  (check-for-all ((a 0 10)
+		  (b 0 10)
+		  (c 0 10))
+    (= (+ a c) (+ c a ))
+    (= (+ a (+ b c)) (+ (+ a b) c))
+    (= (* a b) ( * b a)))
+  )
+
+(test sinepagogi
+  (check-for-all ((a 0 100)
+		  (b 0 100)
+		  (c 0 100))
+    (implies (and
+	      (equal a b)
+	      (equal b c))
+	     (equal b c))))

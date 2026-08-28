@@ -1,0 +1,18 @@
+(defpackage :math
+	    (:use :cl)
+	    (:export
+	     :*empty-set*
+	     :*N*
+	     :*Z*
+	     :*R*
+	     :has-no-duplicates-p
+	     :make-finite-set
+	     :make-predicate-set 
+	     :math-set-finite
+	     :make-infinite-set
+	     :belongs
+	     :set->list
+	     :list->set
+	     :belongs
+	     :equal-sets
+	     ))
