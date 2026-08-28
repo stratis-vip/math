@@ -12,7 +12,7 @@ It based in hellenic scholl books, of Λύκειο.
 
 This library needs (asdf will auto install them if they are in your local system), these packages installed:
 - [lists utilities](https://github.com/stratis-vip/lists/)
-- [strings utilities] (https://github.com/stratis-vip/strings/)
+- [strings utilities](https://github.com/stratis-vip/strings/)
 - [review Testing Library](https://github.com/stratis-vip/review/)
 
 ## Installation
