@@ -32,7 +32,7 @@ After that
 
 You can create the math type of a set, by using the set parser. For example the phrase->math-notation function will take a phrase in Eglish or in Greek and create a math set-definition. 
 ```lisp
-``` (phrase->math-notation "Το σύνολο των πραγματικών αριθμών Χ που είναι μεγαλύτεροι ή ίσοι από το 0") ;=> {x ∈ ℝ | x ≥ 0}
+(phrase->math-notation "Το σύνολο των πραγματικών αριθμών Χ που είναι μεγαλύτεροι ή ίσοι από το 0") ;=> {x ∈ ℝ | x ≥ 0}
 
 (phrase->math-notation "The set of integer numbers y are greater or equal from 0") ;=> {y ∈ ℤ | y ≥ 0}
 ```
