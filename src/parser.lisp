@@ -257,9 +257,7 @@ SET-EXPRESSION has a NIL condition.
 Returns a SET-EXPRESSION AST node.
 
 Signals an error when the input does not conform to the grammar."
-  (expect-keyword parser :the)
-  (expect-keyword parser :set)
-  (expect-keyword parser :of)
+  (expect-keyword parser :the-set-of)
 
   (let ((domain (parse-domain parser)))
 
@@ -323,18 +321,20 @@ condition is present, the condition is also enforced."
   '(;; English
     (("GREATER" "OR" "EQUAL") . "GREATER-OR-EQUAL")
     (("LESS"    "OR" "EQUAL") . "LESS-OR-EQUAL")
+    (("WHICH" "ARE") . "ARE")
+    (("THE" "SET" "OF") . "THE-SET-OF")
    
 
     ;; Greek
     (("ΠΟΥ" "ΕΙΝΑΙ") . "ΕΙΝΑΙ")
     (("ΑΠΟ" "ΤΟ") . "ΑΠΟ")
     (("ΜΕΓΑΛΥΤΕΡΟΙ" "Η" "ΙΣΟΙ") . "GREATER-OR-EQUAL")
-    (("ΜΙΚΡΟΤΕΡΟΙ"  "Η" "ΙΣΟΙ") . "LESS-OR-EQUAL")))
+    (("ΜΙΚΡΟΤΕΡΟΙ"  "Η" "ΙΣΟΙ") . "LESS-OR-EQUAL")
+    (("ΤΟ" "ΣΥΝΟΛΟ" "ΤΩΝ") . "THE-SET-OF")
+   ))
 
 (defparameter *Keywords*
-  '(("ΤΟ" . :THE)            ("THE" . :THE)
-    ("ΣΥΝΟΛΟ" . :SET)        ("SET" . :SET)
-    ("ΤΩΝ" . :OF)            ("OF" . :OF)
+  '(("THE-SET-OF" . :THE-SET-OF) 
     ("ΑΡΙΘΜΩΝ" . :NUMBERS)   ("NUMBERS" . :NUMBERS)
     ("ΕΙΝΑΙ" . :ARE)         ("ARE" . :ARE)
     ("ΑΠΟ" . :FROM)          ("FROM" . :FROM)
