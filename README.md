@@ -142,7 +142,7 @@ or if the sets have different equality tests."
 
     ;; 3. Reduce over all arguments cleanly
     (reduce #'set-intersection-h args :initial-value s1)))
-	```
+```
 	
 * complement 
 
@@ -172,4 +172,4 @@ or if the sets have different equality tests."
      (if args
          (apply #'set-union s args)
          s))))
-		 ```
+ ```
