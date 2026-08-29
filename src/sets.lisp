@@ -98,12 +98,14 @@ MATH-SET-P predicate defined in this file
     (:predicate nil)
     (otherwise nil)))
 
-(defun make-predicate-set (predicate &key (test #'eql))
+(defun make-predicate-set (predicate &key (test #'eql) (doc ""))
   "Creates a MATH-SET with members satisifies PREDICATE function."
   (check-type predicate function)
   (make-math-set :kind :predicate
 		 :members predicate
-		 :test test))
+		 :test test
+		 :documentation doc))
+
 
 (defun predicate-set-p (set)
   (eq :predicate (math-set-kind set)))
@@ -112,9 +114,15 @@ MATH-SET-P predicate defined in this file
 
 ;;some predicate sets
 (defparameter *N* (make-predicate-set
-		   (lambda (x) (and (integerp x) (>= x 0))) :test #'=))
-(defparameter *Z* (make-predicate-set #'integerp :test #'=))
-(defparameter *R* (make-predicate-set #'realp :test #'=))
+		   (lambda (x) (and (integerp x) (>= x 0)))
+		   :test #'=
+		   :doc "{x ∈ ℤ | x ≥ 0}"))
+(defparameter *Z* (make-predicate-set #'integerp
+				      :test #'=
+				      :doc "{x ∈ ℤ}"))
+(defparameter *R* (make-predicate-set #'realp
+				      :test #'=
+				      :doc "{x ∈ ℝ}"))
 
 
 ;;; UNIVERSAL-SET
@@ -267,69 +275,148 @@ INTERSECTION of two sets "
 	   (test (math-set-test s1)))
        (make-predicate-set (lambda (x) (and (funcall p1 x) (funcall p2 x))) :test test)))))
 
-(defun set-complement (s1 s2 &rest args)
-  "COMPLEMENT of 2 or more sets.
+(defun set-complement (omega s &rest args)
+  "Relative COMPLEMENT of one or more sets with respect to OMEGA.
+Computes OMEGA \\ (S ∪ arg1 ∪ arg2 ∪ ...).
 Returns a new explicit SET if all sets are explicit,
 otherwise returns a predicate SET.
-
 Signals an error if any argument is not a valid set
 or if the sets have different equality tests."
-  (let ((all-sets (cons s1 (cons s2  args))))
-    ;; 1. Check all sets validity
+  (let ((all-sets (cons s args)))          ; the sets to be subtracted from omega
+    ;; Check all sets validity (including omega)
+    (unless (math-set-p omega)
+      (error "~S is not a valid set." omega))
     (dolist (set all-sets)
       (unless (math-set-p set)
         (error "~S is not a valid set." set)))
-
-    ;; 2. Check all equality tests consistency
-    (let ((test (math-set-test s1)))
-      (dolist (set args)
+    ;; Check equality tests
+    (let ((test (math-set-test omega)))
+      (dolist (set all-sets)
         (unless (eq test (math-set-test set))
-          (error "Cannot complement  sets with different equality tests."))))
+          (error "Cannot complement sets with different equality tests."))))
+    ;; OMEGA \ (S ∪ arg1 ∪ arg2 ∪ ...)
+    (set-complement-h
+     omega
+     (if args
+         (apply #'set-union s args)
+         s))))
 
-    (set-complement-h (apply #'set-union (subseq all-sets 0 (1- (length all-sets)))) (car (last all-sets)))))
+;; (defun set-complement (s1 s2 &rest args)
+;;   "COMPLEMENT of 2 or more sets.
+;; Returns a new explicit SET if all sets are explicit,
+;; otherwise returns a predicate SET.
 
-(defun set-complement-h (s1 s2)
-  "Complement of set S1 Over S2"
-  (unless (and  (math-set-p s1) (math-set-p s2))
-    (error "s1 and s2 must be valid sets!"))
-  (unless (eq (math-set-test s1)
-	      (math-set-test s2))
-    (error "Cannot find the complemet of  sets with different equality tests."))
+;; Signals an error if any argument is not a valid set
+;; or if the sets have different equality tests."
+;;   (let ((all-sets (cons s1 (cons s2 args))))
+
+;;     ;; Check all sets validity
+;;     (dolist (set all-sets)
+;;       (unless (math-set-p set)
+;;         (error "~S is not a valid set." set)))
+
+;;     ;; Check equality tests
+;;     (let ((test (math-set-test s1)))
+;;       (dolist (set (rest all-sets))
+;;         (unless (eq test (math-set-test set))
+;;           (error "Cannot complement sets with different equality tests."))))
+
+;;     ;; (S1 ∪ S2 ∪ ... ∪ Sn-1) \ Sn
+;;     (set-complement-h
+;;      (apply #'set-union
+;;             (subseq all-sets 0 (1- (length all-sets))))
+;;      (car (last all-sets)))))
+
+(defun set-complement-h (omega s)
+  "Relative complement of set S with respect to OMEGA (i.e. OMEGA \\ S)."
+  (unless (and (math-set-p omega) (math-set-p s))
+    (error "omega and s must be valid sets!"))
+  (unless (eq (math-set-test omega)
+              (math-set-test s))
+    (error "Cannot find the complement of sets with different equality tests."))
   (cond
     ;; both explicit
-    ((and (explicit-set-p s1) (explicit-set-p s2))
-     (let ((l1 (math-set-members s1))
-	   (l2 (math-set-members s2))
-	   (test (math-set-test s1)))
-       (list->set (remove-if (lambda (x) (member x l1 :test test)) l2) :test test)))
+    ((and (explicit-set-p omega) (explicit-set-p s))
+     (let ((l-omega (math-set-members omega))
+           (l-s     (math-set-members s))
+           (test    (math-set-test omega)))
+       (list->set (remove-if (lambda (x) (member x l-s :test test))
+                             l-omega)
+                  :test test)))
 
-    ;;explicit n predicate
-    ((and (explicit-set-p s1) (predicate-set-p s2))
-     (let ((l1 (math-set-members s1))
-	   (predicate (math-set-members s2))
-	   (test (math-set-test s1)))
-       (make-predicate-set (lambda (x) (and (funcall predicate x)
-					    (not (member x l1 :test test)))))))
+    ;; omega explicit, s predicate
+    ((and (explicit-set-p omega) (predicate-set-p s))
+     (let ((l-omega   (math-set-members omega))
+           (predicate (math-set-members s))
+           (test      (math-set-test omega)))
+       (list->set (remove-if (lambda (x) (funcall predicate x))
+                             l-omega)
+                  :test test)))
 
-    ;;predicate n explicit
-    ((and (predicate-set-p s1) (explicit-set-p s2))
-     (let ((l2 (math-set-members s2))
-	   (predicate (math-set-members s1))
-	   (test (math-set-test s2)))
-       (make-predicate-set (lambda (x) (and (not (funcall predicate x))
-					    (member x l2 :test test))))))
+    ;; omega predicate, s explicit
+    ((and (predicate-set-p omega) (explicit-set-p s))
+     (let ((predicate (math-set-members omega))
+           (l-s       (math-set-members s))
+           (test      (math-set-test omega)))
+       (make-predicate-set
+        (lambda (x)
+          (and (funcall predicate x)
+               (not (member x l-s :test test))))
+        :test test)))
+
+    ;; both predicate
+    ((and (predicate-set-p omega) (predicate-set-p s))
+     (let ((p-omega (math-set-members omega))
+           (p-s     (math-set-members s))
+           (test    (math-set-test omega)))
+       (make-predicate-set
+        (lambda (x)
+          (and (funcall p-omega x)
+               (not (funcall p-s x))))
+        :test test)))))
+
+;; (defun set-complement-h (s1 s2)
+;;   "Complement of set S1 Over S2"
+;;   (unless (and  (math-set-p s1) (math-set-p s2))
+;;     (error "s1 and s2 must be valid sets!"))
+;;   (unless (eq (math-set-test s1)
+;; 	      (math-set-test s2))
+;;     (error "Cannot find the complemet of  sets with different equality tests."))
+;;   (cond
+;;     ;; both explicit
+;;     ((and (explicit-set-p s1) (explicit-set-p s2))
+;;      (let ((l1 (math-set-members s1))
+;; 	   (l2 (math-set-members s2))
+;; 	   (test (math-set-test s1)))
+;;        (list->set (remove-if (lambda (x) (member x l2 :test test)) l1) :test test)))
+
+;;     ;;explicit n predicate
+;;     ((and (explicit-set-p s1) (predicate-set-p s2))
+;;      (let ((l1 (math-set-members s1))
+;; 	   (predicate (math-set-members s2))
+;; 	   (test (math-set-test s1)))
+;;        (make-predicate-set (lambda (x) (and (funcall predicate x)
+;; 					    (not (member x l1 :test test)))))))
+
+;;     ;;predicate n explicit
+;;     ((and (predicate-set-p s1) (explicit-set-p s2))
+;;      (let ((l2 (math-set-members s2))
+;; 	   (predicate (math-set-members s1))
+;; 	   (test (math-set-test s2)))
+;;        (make-predicate-set (lambda (x) (and (not (funcall predicate x))
+;; 					    (member x l2 :test test))))))
     
-    ;;predicate n predicate
-    ((and (predicate-set-p s1) (predicate-set-p s2))
-     (let ((p1 (math-set-members s1))
-	   (p2 (math-set-members s2))
-	   (test (math-set-test s1)))
-       (make-predicate-set (lambda (x) (and (not (funcall p1 x)) (funcall p2 x))) :test test)))))
+;;     ;;predicate n predicate
+;;     ((and (predicate-set-p s1) (predicate-set-p s2))
+;;      (let ((p1 (math-set-members s1))
+;; 	   (p2 (math-set-members s2))
+;; 	   (test (math-set-test s1)))
+;;        (make-predicate-set (lambda (x) (and (not (funcall p1 x)) (funcall p2 x))) :test test)))))
 
-(defun append-explicit-sets (s1 s2)
-  (let ((l1 (math-set-members s1))
-	(l2 (math-set-members s2))
-	(test (math-set-test s1)))
-    (list->set (remove-duplicates (append l1 l2) :test test) :test test )))
+;; (defun append-explicit-sets (s1 s2)
+;;   (let ((l1 (math-set-members s1))
+;; 	(l2 (math-set-members s2))
+;; 	(test (math-set-test s1)))
+;;     (list->set (remove-duplicates (append l1 l2) :test test) :test test )))
 
 ;;;MATH:src/sets.lisp ends here
