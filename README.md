@@ -104,21 +104,9 @@ otherwise returns a predicate SET.
 
 Signals an error if any argument is not a valid set
 or if the sets have different equality tests."
-  (let ((all-sets (cons s1 args)))
-    ;; 1. Check all sets validity
-    (dolist (set all-sets)
-      (unless (math-set-p set)
-        (error "~S is not a valid set." set)))
+...)
+```
 
-    ;; 2. Check all equality tests consistency
-    (let ((test (math-set-test s1)))
-      (dolist (set args)
-        (unless (eq test (math-set-test set))
-          (error "Cannot union sets with different equality tests."))))
-
-    ;; 3. Reduce over all arguments cleanly
-    (reduce #'set-union-h args :initial-value s1)))
-	```
 * intersection
 ```lisp
 (defun set-intersection (s1 &rest args)
@@ -128,20 +116,7 @@ otherwise returns a predicate SET.
 
 Signals an error if any argument is not a valid set
 or if the sets have different equality tests."
-  (let ((all-sets (cons s1 args)))
-    ;; 1. Check all sets validity
-    (dolist (set all-sets)
-      (unless (math-set-p set)
-        (error "~S is not a valid set." set)))
-
-    ;; 2. Check all equality tests consistency
-    (let ((test (math-set-test s1)))
-      (dolist (set args)
-        (unless (eq test (math-set-test set))
-          (error "Cannot intersect sets with different equality tests."))))
-
-    ;; 3. Reduce over all arguments cleanly
-    (reduce #'set-intersection-h args :initial-value s1)))
+...)
 ```
 	
 * complement 
@@ -154,22 +129,5 @@ Returns a new explicit SET if all sets are explicit,
 otherwise returns a predicate SET.
 Signals an error if any argument is not a valid set
 or if the sets have different equality tests."
-  (let ((all-sets (cons s args)))          ; the sets to be subtracted from omega
-    ;; Check all sets validity (including omega)
-    (unless (math-set-p omega)
-      (error "~S is not a valid set." omega))
-    (dolist (set all-sets)
-      (unless (math-set-p set)
-        (error "~S is not a valid set." set)))
-    ;; Check equality tests
-    (let ((test (math-set-test omega)))
-      (dolist (set all-sets)
-        (unless (eq test (math-set-test set))
-          (error "Cannot complement sets with different equality tests."))))
-    ;; OMEGA \ (S ∪ arg1 ∪ arg2 ∪ ...)
-    (set-complement-h
-     omega
-     (if args
-         (apply #'set-union s args)
-         s))))
+...)
  ```
