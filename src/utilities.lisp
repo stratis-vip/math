@@ -4,6 +4,23 @@
 
 (in-package :math)
 
+(defun has-more-than-n-p (list n &key (equal nil))
+  "Returns T if LIST Length > n. if EQUAL set to T then 
+N     any positive integer
+LIST  any list
+EQUAL check if N = lenght LIST
+
+This function stops immidiately when it counts n+1 items, so it doesn't
+traverse the wjole list.
+
+In case of invalid input, returns nil immidiately"
+  (if (and (listp list) (integerp n) (plusp n))
+      (loop for item in list
+	    for i from 1 to (1+ n)
+	    finally (return (if equal
+				(and (= i n) (= (length list) n))
+				(> i n))))
+      nil))
 
 ;;; SETS
 
