@@ -131,3 +131,15 @@ Signals an error if any argument is not a valid set
 or if the sets have different equality tests."
 ...)
  ```
+
+* different 
+```lisp
+(defun set-difference (a b &rest args)
+  "Difference of A and one or more sets.
+Computes A \\ (B ∪ arg1 ∪ arg2 ∪ ...).
+Returns a new explicit SET if all sets are explicit,
+otherwise returns a predicate SET.
+Signals an error if any argument is not a valid set
+or if the sets have different equality tests."
+...)
+```
