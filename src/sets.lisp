@@ -419,4 +419,94 @@ or if the sets have different equality tests."
 ;; 	(test (math-set-test s1)))
 ;;     (list->set (remove-duplicates (append l1 l2) :test test) :test test )))
 
+
+(defun set-difference (a b &rest args)
+  "Difference of A and one or more sets.
+Computes A \\ (B ∪ arg1 ∪ arg2 ∪ ...).
+Returns a new explicit SET if all sets are explicit,
+otherwise returns a predicate SET.
+Signals an error if any argument is not a valid set
+or if the sets have different equality tests."
+  (let ((all-sets (cons b args)))
+    ;; Check all sets validity
+    (unless (math-set-p a)
+      (error "~S is not a valid set." a))
+
+    (dolist (set all-sets)
+      (unless (math-set-p set)
+        (error "~S is not a valid set." set)))
+
+    ;; Check equality tests
+    (let ((test (math-set-test a)))
+      (dolist (set all-sets)
+        (unless (eq test (math-set-test set))
+          (error "Cannot find the difference of sets with different equality tests."))))
+
+    ;; A \ (B ∪ arg1 ∪ arg2 ...)
+    (set-difference-h
+     a
+     (if args
+         (apply #'set-union b args)
+         b))))
+
+(defun set-difference-h (a b)
+  "Relative difference of set A and set B (i.e. A \\ B)."
+  (unless (and (math-set-p a) (math-set-p b))
+    (error "a and b must be valid sets!"))
+
+  (unless (eq (math-set-test a)
+              (math-set-test b))
+    (error "Cannot find the difference of sets with different equality tests."))
+
+  (cond
+    ;; both explicit
+    ((and (explicit-set-p a) (explicit-set-p b))
+     (let ((l-a  (math-set-members a))
+           (l-b  (math-set-members b))
+           (test (math-set-test a)))
+       (list->set
+        (remove-if (lambda (x)
+                     (member x l-b :test test))
+                   l-a)
+        :test test)))
+
+    ;; a explicit, b predicate
+    ((and (explicit-set-p a) (predicate-set-p b))
+     (let ((l-a       (math-set-members a))
+           (predicate (math-set-members b))
+           (test      (math-set-test a)))
+       (list->set
+        (remove-if (lambda (x)
+                     (funcall predicate x))
+                   l-a)
+        :test test)))
+
+    ;; a predicate, b explicit
+    ((and (predicate-set-p a) (explicit-set-p b))
+     (let ((predicate (math-set-members a))
+           (l-b       (math-set-members b))
+           (test      (math-set-test a)))
+       (make-predicate-set
+        (lambda (x)
+          (and (funcall predicate x)
+               (not (member x l-b :test test))))
+        :test test)))
+
+    ;; both predicate
+    ((and (predicate-set-p a) (predicate-set-p b))
+     (let ((p-a  (math-set-members a))
+           (p-b  (math-set-members b))
+           (test (math-set-test a)))
+       (make-predicate-set
+        (lambda (x)
+          (and (funcall p-a x)
+               (not (funcall p-b x))))
+        :test test)))))
+
+(defun append-explicit-sets (s1 s2)
+  (let ((l1 (math-set-members s1))
+	(l2 (math-set-members s2))
+	(test (math-set-test s1)))
+    (list->set (remove-duplicates (append l1 l2) :test test) :test test )))
+
 ;;;MATH:src/sets.lisp ends here
