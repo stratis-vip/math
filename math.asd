@@ -12,6 +12,8 @@
 	       (:file "predicates")
 	       (:file "possibilities")
 	       (:file "parser")
+	       (:file "exercises")
+	       (:file "askiseis")
 ))
 
 (defsystem :math/tests
