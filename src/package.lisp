@@ -3,7 +3,8 @@
 ;;; Code:
 
 (defpackage :math
-	    (:use :cl :lists :strings)
+  (:use :cl :lists :strings)
+  (:shadow :SET-DIFFERENCE)
 	    (:export
 
 	     ;; sturctures
@@ -35,17 +36,22 @@
 	     :universe->list
 	     :list->set
 	     :list->universe
+	     :has-more-than-n-p 
 
 	     ;;set-functions
 	     :set-union
 	     :set-intersection
 	     :set-complement
-	     :set-complement-h 
+	     :set-complement-h
+	     :set-difference
 
 	     :phrase->ast
 	     :phrase->math-notation
 	     :phrase->predicate
 
+	     :simple-event-p
+	     :complex-event-p
+	     :mutual-exclusive-p
 	     ))
 
 ;;; file MATH:src/package.lisp ends here Велес
