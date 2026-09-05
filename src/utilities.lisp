@@ -123,7 +123,4 @@ Raise an error in invalid input"
     (count-if (lambda (X) (member x chars :test #'char=)) (coerce phrase 'list)))
 
 
-
-
-
 ;;; MATH:src/utilities.lisp ends here
