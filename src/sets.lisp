@@ -243,6 +243,9 @@ INTERSECTION of two sets "
 	      (math-set-test s2))
     (error "Cannot intersect sets with different equality tests."))
   (cond
+    ;; any of them is empty then result = empty
+    ((or (empty-set-p s1) (empty-set-p s2)) (list->set nil :test (math-set-test s1)))
+    
     ;; both explicit
     ((and (explicit-set-p s1) (explicit-set-p s2))
      (let ((l1 (math-set-members s1))
