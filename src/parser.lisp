@@ -53,6 +53,21 @@
 ;;;
 ;;; When the condition is omitted, the SET-EXPRESSION has CONDITION = NIL.
 
+(defparameter *multi-word-tokens*
+  '(;; English
+    (("GREATER" "OR" "EQUAL") . "GREATER-OR-EQUAL")
+    (("LESS"    "OR" "EQUAL") . "LESS-OR-EQUAL")
+    (("WHICH" "ARE") . "ARE")
+    (("THE" "SET" "OF") . "THE-SET-OF")
+   
+
+    ;; Greek
+    (("ΠΟΥ" "ΕΙΝΑΙ") . "ΕΙΝΑΙ")
+    (("ΑΠΟ" "ΤΟ") . "ΑΠΟ")
+    (("ΜΕΓΑΛΥΤΕΡΟΙ" "Η" "ΙΣΟΙ") . "GREATER-OR-EQUAL")
+    (("ΜΙΚΡΟΤΕΡΟΙ"  "Η" "ΙΣΟΙ") . "LESS-OR-EQUAL")
+    (("ΤΟ" "ΣΥΝΟΛΟ" "ΤΩΝ") . "THE-SET-OF")
+   ))
 ;;;================================================================================
 ;;;                              GRAMMAR STRUCTS
 ;;;================================================================================
@@ -315,24 +330,6 @@ condition is present, the condition is also enforced."
   (let ((ast (phrase->ast phrase :mwt mwt)))
     (set-expression->predicate ast)))
 
-
-
-(defparameter *multi-word-tokens*
-  '(;; English
-    (("GREATER" "OR" "EQUAL") . "GREATER-OR-EQUAL")
-    (("LESS"    "OR" "EQUAL") . "LESS-OR-EQUAL")
-    (("WHICH" "ARE") . "ARE")
-    (("THE" "SET" "OF") . "THE-SET-OF")
-   
-
-    ;; Greek
-    (("ΠΟΥ" "ΕΙΝΑΙ") . "ΕΙΝΑΙ")
-    (("ΑΠΟ" "ΤΟ") . "ΑΠΟ")
-    (("ΜΕΓΑΛΥΤΕΡΟΙ" "Η" "ΙΣΟΙ") . "GREATER-OR-EQUAL")
-    (("ΜΙΚΡΟΤΕΡΟΙ"  "Η" "ΙΣΟΙ") . "LESS-OR-EQUAL")
-    (("ΤΟ" "ΣΥΝΟΛΟ" "ΤΩΝ") . "THE-SET-OF")
-   ))
-
 (defparameter *Keywords*
   '(("THE-SET-OF" . :THE-SET-OF) 
     ("ΑΡΙΘΜΩΝ" . :NUMBERS)   ("NUMBERS" . :NUMBERS)
@@ -467,6 +464,8 @@ Unknown words are returned as tokens with type :UNKNOWN."
 			((member fuzzy *comparisons*) :comparison))
 		:value (cdr fuzzy))
 	       (make-token :type :unknown :value word)))))))      
+
+
 
 
 (defun lexer (phrase &key (mwt *multi-word-tokens*))
